@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { setupServer } from 'msw/node';
 import { rest } from 'msw';
+import { UserEvent } from '@testing-library/user-event/dist/types/setup/setup';
 
 // Polyfill "window.fetch" used in the React component.
 import 'whatwg-fetch';
@@ -91,14 +92,24 @@ describe('Sign Up Page', () => {
   });
 
   describe('Interaction', () => {
-    test('enables the button when password and password repeat has the same value ', async () => {
-      const { user } = setup(<SignUp />);
+    let button: HTMLElement | null;
+
+    async function renderFillAndClick(userEventProp: UserEvent) {
+      const userNameInput = screen.getByLabelText('User Name');
+      const emailInput = screen.getByLabelText('Email');
       const passwordInput = screen.getByLabelText('Password');
       const passwordRepeatinput = screen.getByLabelText('Password Repeat');
 
-      await user.type(passwordInput, signUpNewUserData.password);
-      await user.type(passwordRepeatinput, signUpNewUserData.password);
-      const button = screen.queryByRole('button', { name: 'Sign Up' });
+      await userEventProp.type(userNameInput, signUpNewUserData.username);
+      await userEventProp.type(emailInput, signUpNewUserData.email);
+      await userEventProp.type(passwordInput, signUpNewUserData.password);
+      await userEventProp.type(passwordRepeatinput, signUpNewUserData.password);
+      button = screen.queryByRole('button', { name: 'Sign Up' });
+    }
+
+    test('enables the button when password and password repeat has the same value ', async () => {
+      const { user } = setup(<SignUp />);
+      await renderFillAndClick(user);
       expect(button).toBeEnabled();
     });
 
@@ -112,18 +123,10 @@ describe('Sign Up Page', () => {
           return response;
         })
       );
+
       server.listen();
       const { user } = setup(<SignUp />);
-      const userNameInput = screen.getByLabelText('User Name');
-      const emailInput = screen.getByLabelText('Email');
-      const passwordInput = screen.getByLabelText('Password');
-      const passwordRepeatinput = screen.getByLabelText('Password Repeat');
-
-      await user.type(userNameInput, signUpNewUserData.username);
-      await user.type(emailInput, signUpNewUserData.email);
-      await user.type(passwordInput, signUpNewUserData.password);
-      await user.type(passwordRepeatinput, signUpNewUserData.password);
-      const button = screen.queryByRole('button', { name: 'Sign Up' });
+      await renderFillAndClick(user);
 
       if (!button) {
         fail('Button is not found');
@@ -132,6 +135,59 @@ describe('Sign Up Page', () => {
       await user.click(button);
 
       expect(requestbody).toEqual(signUpNewUserData);
+
+      server.close();
+    });
+
+    test('disables button when there is an ongoing request API call ', async () => {
+      let counter = 0;
+
+      const server = setupServer(
+        rest.post(`${API_ROOT_URL}/users`, async (req, res, ctx) => {
+          counter += 1;
+          const response = await res(ctx.status(200));
+          return response;
+        })
+      );
+      server.listen();
+      const { user } = setup(<SignUp />);
+      await renderFillAndClick(user);
+
+      if (!button) {
+        fail('Button is not found');
+      }
+
+      await user.click(button);
+      await user.click(button);
+
+      expect(counter).toBe(1);
+
+      server.close();
+    });
+
+    test('displays spinner after clicking the submit button', async () => {
+      const server = setupServer(
+        rest.post(`${API_ROOT_URL}/users`, async (req, res, ctx) => {
+          const response = await res(ctx.status(200));
+          return response;
+        })
+      );
+      server.listen();
+      const { user } = setup(<SignUp />);
+      await renderFillAndClick(user);
+
+      if (!button) {
+        fail('Button is not found');
+      }
+
+      const spinner1 = screen.queryByRole('status');
+      expect(spinner1).not.toBeInTheDocument();
+
+      await user.click(button);
+
+      const spinner2 = screen.getByRole('status');
+
+      expect(spinner2).toBeInTheDocument();
 
       server.close();
     });

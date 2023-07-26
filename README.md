@@ -62,11 +62,13 @@ I'm documenting the process I'm creating this for my future reference.
 
     Okay, I think that is a good start.
 
-- Sign Up Form Layout
+- Sign Up Form Layout.
+
   This is a very simple test to check the layout. So just check the basic layout.
 
   - Test:
-    ``
+
+    ```
     describe('Layout', () => {
     test('has a header', () => {
     render(<SignUp />);
@@ -141,9 +143,6 @@ I'm documenting the process I'm creating this for my future reference.
     expect(button).toBeDisabled();
     });
     });
-
-    ```
-
     ```
 
   - Implementation:
@@ -508,7 +507,124 @@ I'm documenting the process I'm creating this for my future reference.
 
   That's it. Now we can use it. Here's the documentation [tailwindCSS](https://tailwindcss.com/)
 
-- $
+- When a user clicks `Sign Up` botton, the browser sends a request to the backend. The problem is the user can click it many times. We don't want it. And also we want to show progress bar
+
+  - First let's create a test to disable the button when there is an ongoing request.
+
+    ```
+    test('disables button when there is an ongoing request API call ', async () => {
+      let counter = 0;
+
+      const server = setupServer(
+        rest.post(`${API_ROOT_URL}/users`, async (req, res, ctx) => {
+          counter += 1;
+          const response = await res(ctx.status(200));
+          return response;
+        })
+      );
+      server.listen();
+      const { user } = setup(<SignUp />);
+      const userNameInput = screen.getByLabelText('User Name');
+      const emailInput = screen.getByLabelText('Email');
+      const passwordInput = screen.getByLabelText('Password');
+      const passwordRepeatinput = screen.getByLabelText('Password Repeat');
+
+      await user.type(userNameInput, signUpNewUserData.username);
+      await user.type(emailInput, signUpNewUserData.email);
+      await user.type(passwordInput, signUpNewUserData.password);
+      await user.type(passwordRepeatinput, signUpNewUserData.password);
+      const button = screen.queryByRole('button', { name: 'Sign Up' });
+
+      if (!button) {
+        fail('Button is not found');
+      }
+
+      await user.click(button);
+      await user.click(button);
+
+      expect(counter).toBe(1);
+
+      server.close();
+    });
+    ```
+
+  - The implementation is very simple. In the button component if compare whether the password or passwordRepeat is the same. If it's the same then we set it false. Let's use an OR operator to manipulate the behaviour.
+    Let's create a new state `const [apiProgress, setApiProgress] = useState<boolean>(false);`
+    After that in the `handleSubmit` function we set the apiProgress to true:
+
+    ```
+    const handleSubmit = useCallback(
+      async (event: React.MouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+        const bodyPost: SignUpPostType = {
+          username: userNameInput.value,
+          email: emailInput.value,
+          password: passwordInput.value,
+        };
+
+        setApiProgress(true);
+        await FetchAPI.post('/users', bodyPost);
+      },
+      [userNameInput.value, emailInput.value, passwordInput.value]
+    );
+    ```
+
+    then let's use the OR operator in the button `<Button onClick={handleSubmit} disabled={isDisabled || apiProgress}>`.
+    By leveraging this operator, we can set disabled to be true since false or true equals true. Very smart right?
+
+  - Now let's create the next test. This time, we'll create a loading spinner when we click submit.
+
+    ```
+    test('displays spinner after clicking the submit button', async () => {
+      const server = setupServer(
+        rest.post(`${API_ROOT_URL}/users`, async (req, res, ctx) => {
+          const response = await res(ctx.status(200));
+          return response;
+        })
+      );
+      server.listen();
+      const { user } = setup(<SignUp />);
+      await renderFillAndClick(user);
+
+      if (!button) {
+        fail('Button is not found');
+      }
+
+      const spinner1 = screen.queryByRole('status');
+      expect(spinner1).not.toBeInTheDocument();
+
+      await user.click(button);
+
+      const spinner2 = screen.getByRole('status');
+
+      expect(spinner2).toBeInTheDocument();
+
+      server.close();
+    });
+    ```
+
+    Now for the implementation. We create the element Spinner. This is an inline element that shows spinning animation.
+
+    ```
+    export default function Spinner() {
+      return (
+        <span
+          role="status"
+          className="inline-block h-5 w-5 animate-spin rounded-full border-4 border-solid border-current border-red-500 border-r-transparent align-[-0.125em]"
+        />
+      );
+    }
+    ```
+
+    Ok and for the implemention, we just check whether the state `apiProgress` is true to display the spinner. Anyway please take a look at the test for this, you can see that to check whether this spinner isn't rendered we use `queryByRole`.
+
+    ```
+    <Button onClick={handleSubmit} disabled={isDisabled || apiProgress}>
+      {apiProgress && <Spinner />}
+      Sign Up
+    </Button>
+    ```
+
 - $
 - $
 - $
