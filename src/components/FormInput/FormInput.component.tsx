@@ -1,6 +1,6 @@
 import { FormInputProps } from './FormInput.types';
 
-export function FormInput({
+export default function FormInput({
   labelName,
   htmlFor,
   onChange,
@@ -10,22 +10,24 @@ export function FormInput({
 }: FormInputProps) {
   return (
     <div>
-      <label htmlFor={htmlFor}
+      <label
+        htmlFor={htmlFor}
         className={`
-          block mt-2
+          mt-2 block
           text-left
         `}
       >
         {labelName}
       </label>
-      <input onChange={onChange} value={value} id={id} type={type? type : 'text'}
-        className = { `
-        focus:bg-violet-100 
-          border-2 border-gray-300 
-          rounded-md px-2 py-1 my-2
-          w-full
-
-          text-left
+      <input
+        onChange={onChange}
+        value={value}
+        id={id}
+        type={type || 'text'}
+        className={`
+          my-2 w-full rounded-md border-2 border-gray-300
+          px-2 py-1
+          text-left focus:bg-violet-100 
         `}
       />
     </div>
