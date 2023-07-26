@@ -1,11 +1,9 @@
 import React, { ChangeEvent, useCallback, useState } from 'react';
-
 import { FetchAPI } from '../../services/utils/fetchAPI';
-
 import { SignUpPostType } from './SignUp.component.types';
-
 import FormInput from '../../components/FormInput/FormInput.component';
 import Button from '../../components/Button/Button.component';
+import Spinner from '../../components/Spinner/Spinner.component';
 
 function useInputState(initialValue = '') {
   const [value, setValue] = useState<string>(initialValue);
@@ -28,6 +26,7 @@ export default function SignUp() {
   const emailInput = useInputState();
   const passwordInput = useInputState();
   const passwordRepeatInput = useInputState();
+  const [apiProgress, setApiProgress] = useState<boolean>(false);
 
   const isDisabled = checkIfButtonIsDisabled(
     passwordInput.value,
@@ -43,6 +42,7 @@ export default function SignUp() {
         password: passwordInput.value,
       };
 
+      setApiProgress(true);
       await FetchAPI.post('/users', bodyPost);
     },
     [userNameInput.value, emailInput.value, passwordInput.value]
@@ -86,7 +86,8 @@ export default function SignUp() {
             id="passwordRepeat"
             type="password"
           />
-          <Button onClick={handleSubmit} disabled={isDisabled}>
+          <Button onClick={handleSubmit} disabled={isDisabled || apiProgress}>
+            {apiProgress && <Spinner />}
             Sign Up
           </Button>
         </div>
