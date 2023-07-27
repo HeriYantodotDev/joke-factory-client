@@ -625,7 +625,92 @@ I'm documenting the process I'm creating this for my future reference.
     </Button>
     ```
 
-- $
+- Layout - Sign Up Successful
+  Now let's create a test for our next feature is to display account activation notification and hides the sign up form.
+  However, we have to adjust our previous test first for displays spinner. So how?
+
+  ```
+      user.click(button);
+
+      await waitFor(() => {
+        const spinner2 = screen.queryByRole('status');
+        expect(spinner2).toBeInTheDocument();
+      });
+  ```
+
+  In the test above we remove await `user.click(button)` amd then wrap the spinner checkin in the `waitFor`. The purpose of this is to ensure the consistency of the test. So after a user clicks a button the next step is the spinner will be rendered and after getting the successful response, the sign up form will be hidden.
+
+  The problem is if we using `await` then we don't know when the response will come back. if it's faster, then the test to check the spinner will be failed. The result of the test will be inconsistent.
+
+  - Here's the test for displays and hide the sign up form
+
+    ```
+    test('displays account activation notification after successful sign up', async () => {
+      const server = setupServer(
+        rest.post(`${API_ROOT_URL}/users`, async (req, res, ctx) => {
+          const response = await res(ctx.status(200));
+          return response;
+        })
+      );
+
+      server.listen();
+      const { user } = setup(<SignUp />);
+      await renderFillAndClick(user);
+
+      if (!button) {
+        fail('Button is not found');
+      }
+
+      const message = 'Please check you email to activate your account';
+      expect(screen.queryByText(message)).not.toBeInTheDocument();
+
+      await user.click(button);
+
+      const text = await screen.findByText(
+        'Please check you email to activate your account'
+      );
+      expect(text).toBeInTheDocument();
+      server.close();
+    });
+
+    test('hides sign up form after successful sign up request', async () => {
+      const server = setupServer(
+        rest.post(`${API_ROOT_URL}/users`, async (req, res, ctx) => {
+          const response = await res(ctx.status(200));
+          return response;
+        })
+      );
+
+      server.listen();
+      const { user } = setup(<SignUp />);
+      await renderFillAndClick(user);
+
+      if (!button) {
+        fail('Button is not found');
+      }
+      const form = screen.getByTestId('formSignUp');
+      user.click(button);
+      await waitFor(() => {
+        expect(form).not.toBeInTheDocument();
+      });
+    });
+    ```
+
+  - And here's the implementation.
+    First we create a new state :
+
+    ```
+      const [signUpSuccess, setSignUpSuccess] = useState<boolean>(false);
+    ```
+
+    This new state will track for the success response from the server.
+
+    Then like this:
+
+    ```
+    {!signUpSuccess && ( .. the form element
+    ```
+
 - $
 - $
 
