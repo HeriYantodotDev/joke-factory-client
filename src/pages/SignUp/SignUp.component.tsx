@@ -4,6 +4,7 @@ import { SignUpPostType } from './SignUp.component.types';
 import FormInput from '../../components/FormInput/FormInput.component';
 import Button from '../../components/Button/Button.component';
 import Spinner from '../../components/Spinner/Spinner.component';
+import Typewriter from '../../components/TypeWritter/Typewritter.component';
 
 function useInputState(initialValue = '') {
   const [value, setValue] = useState<string>(initialValue);
@@ -20,6 +21,12 @@ function useInputState(initialValue = '') {
 function checkIfButtonIsDisabled(password: string, passwordRepeat: string) {
   return !(password && passwordRepeat) || password !== passwordRepeat;
 }
+
+const typewriterArray = [
+  'Joke Factory',
+  'The best platform',
+  'For sharing jokes',
+];
 
 export default function SignUp() {
   const userNameInput = useInputState();
@@ -91,6 +98,7 @@ export default function SignUp() {
             Sign Up
           </Button>
         </div>
+        <Typewriter text={typewriterArray} />
       </form>
     </div>
   );
