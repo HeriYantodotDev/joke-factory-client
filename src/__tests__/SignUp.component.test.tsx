@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { setupServer } from 'msw/node';
 import { rest } from 'msw';
@@ -183,13 +183,64 @@ describe('Sign Up Page', () => {
       const spinner1 = screen.queryByRole('status');
       expect(spinner1).not.toBeInTheDocument();
 
-      await user.click(button);
+      user.click(button);
 
-      const spinner2 = screen.getByRole('status');
-
-      expect(spinner2).toBeInTheDocument();
+      await waitFor(() => {
+        const spinner2 = screen.queryByRole('status');
+        expect(spinner2).toBeInTheDocument();
+      });
 
       server.close();
+    });
+
+    test('displays account activation notification after successful sign up', async () => {
+      const server = setupServer(
+        rest.post(`${API_ROOT_URL}/users`, async (req, res, ctx) => {
+          const response = await res(ctx.status(200));
+          return response;
+        })
+      );
+
+      server.listen();
+      const { user } = setup(<SignUp />);
+      await renderFillAndClick(user);
+
+      if (!button) {
+        fail('Button is not found');
+      }
+
+      const message = 'Please check you email to activate your account';
+      expect(screen.queryByText(message)).not.toBeInTheDocument();
+
+      await user.click(button);
+
+      const text = await screen.findByText(
+        'Please check you email to activate your account'
+      );
+      expect(text).toBeInTheDocument();
+      server.close();
+    });
+
+    test('hides sign up form after successful sign up request', async () => {
+      const server = setupServer(
+        rest.post(`${API_ROOT_URL}/users`, async (req, res, ctx) => {
+          const response = await res(ctx.status(200));
+          return response;
+        })
+      );
+
+      server.listen();
+      const { user } = setup(<SignUp />);
+      await renderFillAndClick(user);
+
+      if (!button) {
+        fail('Button is not found');
+      }
+      const form = screen.getByTestId('formSignUp');
+      user.click(button);
+      await waitFor(() => {
+        expect(form).not.toBeInTheDocument();
+      });
     });
   });
 });
