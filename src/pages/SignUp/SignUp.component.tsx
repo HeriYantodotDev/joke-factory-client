@@ -42,16 +42,19 @@ export default function SignUp() {
 
   const handleSubmit = useCallback(
     async (event: React.MouseEvent<HTMLButtonElement>) => {
-      event.preventDefault();
-      const bodyPost: SignUpPostType = {
-        username: userNameInput.value,
-        email: emailInput.value,
-        password: passwordInput.value,
-      };
-
-      setApiProgress(true);
-      await FetchAPI.post('/users', bodyPost);
-      setSignUpSuccess(true);
+      try {
+        event.preventDefault();
+        const bodyPost: SignUpPostType = {
+          username: userNameInput.value,
+          email: emailInput.value,
+          password: passwordInput.value,
+        };
+        setApiProgress(true);
+        await FetchAPI.post('/users', bodyPost);
+        setSignUpSuccess(true);
+      } catch (err) {
+        // later
+      }
     },
     [userNameInput.value, emailInput.value, passwordInput.value]
   );

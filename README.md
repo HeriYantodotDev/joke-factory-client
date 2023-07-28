@@ -711,8 +711,19 @@ I'm documenting the process I'm creating this for my future reference.
     {!signUpSuccess && ( .. the form element
     ```
 
-- $
-- $
+- Refactoring The test
+  Instead of hardcoding server everytime we run the test, we can use beforeAll and beforeEach for the test
+
+## Validation
+
+- $ Displaying Validatrion Errors
+- $ Enable Button After Validation
+- $ Mock Service Worker - Override handler
+- $ Component - input
+- $ Styling Input
+- $ Displaying Errors for Remaining
+- $ Client-side Validation
+- $ Hiding Errors
 
 # Journal
 
