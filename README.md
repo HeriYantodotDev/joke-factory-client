@@ -725,6 +725,15 @@ I'm documenting the process I'm creating this for my future reference.
 - $ Client-side Validation
 - $ Hiding Errors
 
+## Internationalization
+
+- $ Internationalization i18n
+- $ Language Selection
+- $ Component - Language selector
+- $ Validation Translation
+- $ Accept Language Header in Api Request
+- $ Refactor - Api Request Module
+
 # Journal
 
 - July 22 2023 - Setting Up The client Project
