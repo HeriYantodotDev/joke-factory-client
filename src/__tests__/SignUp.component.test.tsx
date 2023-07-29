@@ -101,7 +101,7 @@ describe('Sign Up Page', () => {
       rest.post(`${API_ROOT_URL}/users`, async (req, res, ctx) => {
         counter += 1;
         requestbody = await req.json();
-        const response = await res(ctx.status(200));
+        const response = await res(ctx.status(200), ctx.json({}));
         return response;
       })
     );
@@ -118,7 +118,15 @@ describe('Sign Up Page', () => {
       server.close();
     });
 
-    async function renderFillAndClick(userEventProp: UserEvent) {
+    async function renderAndFillPasswordOnly(userEventProp: UserEvent) {
+      const passwordInput = screen.getByLabelText('Password');
+      const passwordRepeatinput = screen.getByLabelText('Password Repeat');
+      await userEventProp.type(passwordInput, signUpNewUserData.password);
+      await userEventProp.type(passwordRepeatinput, signUpNewUserData.password);
+      button = screen.queryByRole('button', { name: 'Sign Up' });
+    }
+
+    async function renderAndFill(userEventProp: UserEvent) {
       const userNameInput = screen.getByLabelText('User Name');
       const emailInput = screen.getByLabelText('Email');
       const passwordInput = screen.getByLabelText('Password');
@@ -133,13 +141,13 @@ describe('Sign Up Page', () => {
 
     test('enables the button when password and password repeat has the same value ', async () => {
       const { user } = setup(<SignUp />);
-      await renderFillAndClick(user);
+      await renderAndFill(user);
       expect(button).toBeEnabled();
     });
 
     test('sends username, email, and password to backend after clicking the button', async () => {
       const { user } = setup(<SignUp />);
-      await renderFillAndClick(user);
+      await renderAndFill(user);
 
       if (!button) {
         fail('Button is not found');
@@ -151,14 +159,14 @@ describe('Sign Up Page', () => {
     });
 
     test('disables button when there is an ongoing request API call ', async () => {
-      server.listen();
       const { user } = setup(<SignUp />);
-      await renderFillAndClick(user);
+      await renderAndFill(user);
 
       if (!button) {
         fail('Button is not found');
       }
 
+      await user.click(button);
       await user.click(button);
       await user.click(button);
 
@@ -168,7 +176,7 @@ describe('Sign Up Page', () => {
     test('displays spinner after clicking the submit button', async () => {
       server.listen();
       const { user } = setup(<SignUp />);
-      await renderFillAndClick(user);
+      await renderAndFill(user);
 
       if (!button) {
         fail('Button is not found');
@@ -187,7 +195,7 @@ describe('Sign Up Page', () => {
 
     test('displays account activation notification after successful sign up', async () => {
       const { user } = setup(<SignUp />);
-      await renderFillAndClick(user);
+      await renderAndFill(user);
 
       if (!button) {
         fail('Button is not found');
@@ -198,15 +206,17 @@ describe('Sign Up Page', () => {
 
       await user.click(button);
 
-      const text = await screen.findByText(
-        'Please check you email to activate your account'
-      );
-      expect(text).toBeInTheDocument();
+      await waitFor(() => {
+        const text = screen.getByText(
+          'Please check you email to activate your account'
+        );
+        expect(text).toBeInTheDocument();
+      });
     });
 
     test('hides sign up form after successful sign up request', async () => {
       const { user } = setup(<SignUp />);
-      await renderFillAndClick(user);
+      await renderAndFill(user);
 
       if (!button) {
         fail('Button is not found');
@@ -216,6 +226,36 @@ describe('Sign Up Page', () => {
       await waitFor(() => {
         expect(form).not.toBeInTheDocument();
       });
+    });
+
+    test('displays validation message for username', async () => {
+      server.use(
+        rest.post(`${API_ROOT_URL}/users`, async (req, res, ctx) => {
+          const response = await res(
+            ctx.status(400),
+            ctx.json({
+              validationErrors: {
+                username: 'username is not allowed to be empty',
+              },
+            })
+          );
+          return response;
+        })
+      );
+      const { user } = setup(<SignUp />);
+
+      await renderAndFillPasswordOnly(user);
+
+      if (!button) {
+        fail('Button is not found');
+      }
+      await user.click(button);
+
+      const validationError = await screen.findByText(
+        'username is not allowed to be empty'
+      );
+
+      expect(validationError).toBeInTheDocument();
     });
   });
 });

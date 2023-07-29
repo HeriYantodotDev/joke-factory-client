@@ -716,7 +716,153 @@ I'm documenting the process I'm creating this for my future reference.
 
 ## Validation
 
-- $ Displaying Validatrion Errors
+- Displaying Validation Errors
+  Now let's display a text for validation Errors. If the username is blank then we display the correct validation Error.
+
+  - Test
+
+    ```
+    test('displays validation message for username', async () => {
+      server.use(
+        rest.post(`${API_ROOT_URL}/users`, async (req, res, ctx) => {
+          const response = await res(
+            ctx.status(400),
+            ctx.json({
+              validationErrors: {
+                username: 'username is not allowed to be empty',
+              },
+            })
+          );
+          return response;
+        })
+      );
+      const { user } = setup(<SignUp />);
+
+      await renderAndFillPasswordOnly(user);
+
+      if (!button) {
+        fail('Button is not found');
+      }
+      await user.click(button);
+
+      const validationError = await screen.findByText(
+        'username is not allowed to be empty'
+      );
+
+      expect(validationError).toBeInTheDocument();
+    });
+    ```
+
+  - Implementation
+    For the implementation, first we have to create a new state for this:
+
+    ```
+    const [errors, setErrors] = useState<ErrorsStateSignUpType>({});
+    ```
+
+    Of course we have to set a type for this for consistency:
+
+    ```
+    export interface ErrorsStateSignUpType {
+      username?: string;
+      email?: string;
+      password?: string;
+    }
+    ```
+
+    Now in the `handleSubmit` function, we throw an error if the status code is not okay:
+
+    ```
+    const handleSubmit = useCallback(
+        async (event: React.MouseEvent<HTMLButtonElement>) => {
+          try {
+            event.preventDefault();
+            const bodyPost: SignUpPostType = {
+              username: userNameInput.value,
+              email: emailInput.value,
+              password: passwordInput.value,
+            };
+            setApiProgress(true);
+            const response = await FetchAPI.post('/users', bodyPost);
+
+            const data = await response.json();
+
+            if (!response.ok && response.status === 400) {
+              throw new SignUpError(data);
+            }
+
+            setSignUpSuccess(true);
+          } catch (err) {
+            if (err instanceof SignUpError) {
+              setErrors(err.errorResponse.validationErrors || {});
+            }
+            setApiProgress(false);
+          }
+        },
+        [userNameInput.value, emailInput.value, passwordInput.value]
+      );
+    ```
+
+    Okay as you can see above that first we change the response into Javascript object and then we pass in the response data into the Error Class. Here's the error class:
+
+    ```
+    import { ErrorResponseSignUp } from '../../pages/SignUp/SignUp.component.types';
+
+    export default class SignUpError extends Error {
+      public code = 400;
+
+      public errorResponse: ErrorResponseSignUp;
+
+      constructor(errorResponse: ErrorResponseSignUp) {
+        const { message } = errorResponse;
+        super(message);
+        this.errorResponse = errorResponse;
+      }
+    }
+    ```
+
+    How about the data type, the data type is the data that we get from the backend:
+
+    ```
+    export interface ErrorResponseSignUp {
+      message: string;
+      path: string;
+      timeStamp: string;
+      validationErrors?: {
+        username?: string;
+        email?: string;
+        password?: string;
+      };
+    }
+    ```
+
+    I'm putting all the data types from the backend under the `utils` folder, and within `backEndResponseDataType.ts`
+
+    Now let's render the document like this:
+
+    ```
+    <FormInput
+      labelName="User Name"
+      htmlFor="userName"
+      onChange={userNameInput.onchange}
+      value={userNameInput.value}
+      id="userName"
+    />
+    <ErrorFormText>{errors.username}</ErrorFormText>
+    ```
+
+    And here's the `ErrorFormText`:
+
+    ```
+    import { ErrorFormTextType } from './ErrorFormText.types';
+
+    export default function ErrorFormText({ children }: ErrorFormTextType) {
+      return <span className="text-sm text-red-500">{children}</span>;
+    }
+    ```
+
+    It's quite long huh? Anyway, why don't we just use Axio for ease? Well, I'll like to have some flexibility to control errors.
+
 - $ Enable Button After Validation
 - $ Mock Service Worker - Override handler
 - $ Component - input

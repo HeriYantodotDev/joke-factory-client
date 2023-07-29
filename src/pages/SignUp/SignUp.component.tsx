@@ -1,9 +1,14 @@
 import React, { ChangeEvent, useCallback, useState } from 'react';
 import { FetchAPI } from '../../services/utils/fetchAPI';
-import { SignUpPostType } from './SignUp.component.types';
+import {
+  SignUpPostType,
+  ErrorsStateSignUpType,
+} from './SignUp.component.types';
+import SignUpError from '../../services/Errors/SignUpErrorClass';
 import FormInput from '../../components/FormInput/FormInput.component';
 import Button from '../../components/Button/Button.component';
 import Spinner from '../../components/Spinner/Spinner.component';
+import ErrorFormText from '../../components/ErrorFormText/ErrorFormText.component';
 
 function useInputState(initialValue = '') {
   const [value, setValue] = useState<string>(initialValue);
@@ -21,12 +26,6 @@ function checkIfButtonIsDisabled(password: string, passwordRepeat: string) {
   return !(password && passwordRepeat) || password !== passwordRepeat;
 }
 
-const typewriterArray = [
-  'Joke Factory',
-  'The best platform',
-  'For sharing jokes',
-];
-
 export default function SignUp() {
   const userNameInput = useInputState();
   const emailInput = useInputState();
@@ -34,6 +33,7 @@ export default function SignUp() {
   const passwordRepeatInput = useInputState();
   const [apiProgress, setApiProgress] = useState<boolean>(false);
   const [signUpSuccess, setSignUpSuccess] = useState<boolean>(false);
+  const [errors, setErrors] = useState<ErrorsStateSignUpType>({});
 
   const isDisabled = checkIfButtonIsDisabled(
     passwordInput.value,
@@ -50,10 +50,22 @@ export default function SignUp() {
           password: passwordInput.value,
         };
         setApiProgress(true);
-        await FetchAPI.post('/users', bodyPost);
+        const response = await FetchAPI.post('/users', bodyPost);
+
+        const data = await response.json();
+
+        // To Do: Create a handling error function to make this function cleaner
+
+        if (!response.ok && response.status === 400) {
+          throw new SignUpError(data);
+        }
+
         setSignUpSuccess(true);
       } catch (err) {
-        // later
+        if (err instanceof SignUpError) {
+          setErrors(err.errorResponse.validationErrors || {});
+        }
+        setApiProgress(false);
       }
     },
     [userNameInput.value, emailInput.value, passwordInput.value]
@@ -76,6 +88,7 @@ export default function SignUp() {
                 value={userNameInput.value}
                 id="userName"
               />
+              <ErrorFormText>{errors.username}</ErrorFormText>
               <FormInput
                 labelName="Email"
                 htmlFor="email"
