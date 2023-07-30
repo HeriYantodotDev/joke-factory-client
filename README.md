@@ -884,4 +884,4 @@ I'm documenting the process I'm creating this for my future reference.
 
 - July 22 2023 - Setting Up The client Project
   Let's begin this. Start the app with Vite 🌩️. After considering, I think I need to learn properly to do the TDD at React. Instead of trial and error, with the proper guidance, I can use this as a starting point and expand it.
--
+- July 30 2023 - Just reinstalling my Windows & WSl. 
