@@ -5,4 +5,5 @@ export interface FormInputProps {
   value: string;
   id: string;
   type?: string;
+  error?: string;
 }

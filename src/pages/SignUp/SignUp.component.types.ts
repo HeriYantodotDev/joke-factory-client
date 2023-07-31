@@ -10,6 +10,7 @@ export interface ErrorsStateSignUpType {
   username?: string;
   email?: string;
   password?: string;
+  passwordRepeat?: string;
 }
 
 export interface ErrorsSignUpType extends Error {
