@@ -863,12 +863,18 @@ I'm documenting the process I'm creating this for my future reference.
 
     It's quite long huh? Anyway, why don't we just use Axio for ease? Well, I'll like to have some flexibility to control errors.
 
-- $ Enable Button After Validation
+- Enable Button After Validation
+
 - $ Mock Service Worker - Override handler
+
 - $ Component - input
+
 - $ Styling Input
+
 - $ Displaying Errors for Remaining
+
 - $ Client-side Validation
+
 - $ Hiding Errors
 
 ## Internationalization
