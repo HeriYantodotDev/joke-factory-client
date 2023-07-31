@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { setupServer } from 'msw/node';
 import { rest } from 'msw';
 import { UserEvent } from '@testing-library/user-event/dist/types/setup/setup';
+import '../locale/i18n';
 
 // Polyfill "window.fetch" used in the React component.
 import 'whatwg-fetch';
@@ -11,7 +12,7 @@ import 'whatwg-fetch';
 import '@testing-library/jest-dom';
 
 import { API_ROOT_URL } from '../services/utils/fetchAPI';
-import SignUp from '../pages/SignUp/SignUp.component';
+import SignUpT from '../pages/SignUp/SignUp.component';
 
 function setup(jsx: JSX.Element) {
   return {
@@ -29,31 +30,31 @@ const signUpNewUserData = {
 describe('Sign Up Page', () => {
   describe('Layout', () => {
     test('has a header', () => {
-      render(<SignUp />);
+      render(<SignUpT />);
       const header = screen.queryByRole('heading', { name: 'Sign Up' });
       expect(header).toBeInTheDocument();
     });
 
     test('has a username input', () => {
-      render(<SignUp />);
+      render(<SignUpT />);
       const input = screen.getByLabelText('User Name');
       expect(input).toBeInTheDocument();
     });
 
     test('has an email input', () => {
-      render(<SignUp />);
+      render(<SignUpT />);
       const input = screen.getByLabelText('Email');
       expect(input).toBeInTheDocument();
     });
 
     test('has a password input', () => {
-      render(<SignUp />);
+      render(<SignUpT />);
       const input = screen.getByLabelText('Password');
       expect(input).toBeInTheDocument();
     });
 
     test('has password type for password input', () => {
-      render(<SignUp />);
+      render(<SignUpT />);
       const input = screen.getByLabelText('Password');
 
       if (!(input instanceof HTMLInputElement)) {
@@ -63,13 +64,13 @@ describe('Sign Up Page', () => {
     });
 
     test('has a password repeat input', () => {
-      render(<SignUp />);
+      render(<SignUpT />);
       const input = screen.getByLabelText('Password Repeat');
       expect(input).toBeInTheDocument();
     });
 
     test('has password type for password repeat input', () => {
-      render(<SignUp />);
+      render(<SignUpT />);
       const input = screen.getByLabelText('Password Repeat');
 
       if (!(input instanceof HTMLInputElement)) {
@@ -79,13 +80,13 @@ describe('Sign Up Page', () => {
     });
 
     test('has a sign up button', () => {
-      render(<SignUp />);
+      render(<SignUpT />);
       const button = screen.queryByRole('button', { name: 'Sign Up' });
       expect(button).toBeInTheDocument();
     });
 
     test('disables the button initially', () => {
-      render(<SignUp />);
+      render(<SignUpT />);
       const button = screen.queryByRole('button', { name: 'Sign Up' });
       expect(button).toBeDisabled();
     });
@@ -141,13 +142,13 @@ describe('Sign Up Page', () => {
     }
 
     test('enables the button when password and password repeat has the same value ', async () => {
-      const { user } = setup(<SignUp />);
+      const { user } = setup(<SignUpT />);
       await renderAndFill(user);
       expect(button).toBeEnabled();
     });
 
     test('sends username, email, and password to backend after clicking the button', async () => {
-      const { user } = setup(<SignUp />);
+      const { user } = setup(<SignUpT />);
       await renderAndFill(user);
 
       if (!button) {
@@ -160,7 +161,7 @@ describe('Sign Up Page', () => {
     });
 
     test('disables button when there is an ongoing request API call ', async () => {
-      const { user } = setup(<SignUp />);
+      const { user } = setup(<SignUpT />);
       await renderAndFill(user);
 
       if (!button) {
@@ -176,7 +177,7 @@ describe('Sign Up Page', () => {
 
     test('displays spinner after clicking the submit button', async () => {
       server.listen();
-      const { user } = setup(<SignUp />);
+      const { user } = setup(<SignUpT />);
       await renderAndFill(user);
 
       if (!button) {
@@ -195,7 +196,7 @@ describe('Sign Up Page', () => {
     });
 
     test('displays account activation notification after successful sign up', async () => {
-      const { user } = setup(<SignUp />);
+      const { user } = setup(<SignUpT />);
       await renderAndFill(user);
 
       if (!button) {
@@ -216,7 +217,7 @@ describe('Sign Up Page', () => {
     });
 
     test('hides sign up form after successful sign up request', async () => {
-      const { user } = setup(<SignUp />);
+      const { user } = setup(<SignUpT />);
       await renderAndFill(user);
 
       if (!button) {
@@ -248,7 +249,7 @@ describe('Sign Up Page', () => {
 
     test('hides spinner and enables button after response receveid', async () => {
       server.use(generateValidationError());
-      const { user } = setup(<SignUp />);
+      const { user } = setup(<SignUpT />);
 
       await renderAndFillPasswordOnly(user);
 
@@ -270,7 +271,7 @@ describe('Sign Up Page', () => {
       ${'password'} | ${'password is not allowed to be empty'}
     `('display $message for $field', async ({ field, message }) => {
       server.use(generateValidationError(field, message));
-      const { user } = setup(<SignUp />);
+      const { user } = setup(<SignUpT />);
 
       await renderAndFillPasswordOnly(user);
 
@@ -285,7 +286,7 @@ describe('Sign Up Page', () => {
     });
 
     test('displays mismatch message for password repeat input', async () => {
-      const { user } = setup(<SignUp />);
+      const { user } = setup(<SignUpT />);
       const passwordInput = screen.getByLabelText('Password');
       const passwordRepeatinput = screen.getByLabelText('Password Repeat');
       await user.type(passwordInput, signUpNewUserData.password);
@@ -306,7 +307,7 @@ describe('Sign Up Page', () => {
       'clears validation error after $field is updated',
       async ({ field, message, label }) => {
         server.use(generateValidationError(field, message));
-        const { user } = setup(<SignUp />);
+        const { user } = setup(<SignUpT />);
         await renderAndFillPasswordOnly(user);
 
         if (!button) {
