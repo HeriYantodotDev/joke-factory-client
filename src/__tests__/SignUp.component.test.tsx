@@ -257,5 +257,32 @@ describe('Sign Up Page', () => {
 
       expect(validationError).toBeInTheDocument();
     });
+    test('hides spinner and enables button after response receveid', async () => {
+      server.use(
+        rest.post(`${API_ROOT_URL}/users`, async (req, res, ctx) => {
+          const response = await res(
+            ctx.status(400),
+            ctx.json({
+              validationErrors: {
+                username: 'username is not allowed to be empty',
+              },
+            })
+          );
+          return response;
+        })
+      );
+      const { user } = setup(<SignUp />);
+
+      await renderAndFillPasswordOnly(user);
+
+      if (!button) {
+        fail('Button is not found');
+      }
+      await user.click(button);
+
+      expect(screen.queryByRole('status')).not.toBeInTheDocument();
+      expect(button).toBeEnabled();
+
+    });
   });
 });
