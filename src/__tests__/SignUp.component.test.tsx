@@ -112,6 +112,7 @@ describe('Sign Up Page', () => {
 
     beforeEach(() => {
       counter = 0;
+      server.resetHandlers();
     });
 
     afterAll(() => {
@@ -257,6 +258,7 @@ describe('Sign Up Page', () => {
 
       expect(validationError).toBeInTheDocument();
     });
+
     test('hides spinner and enables button after response receveid', async () => {
       server.use(
         rest.post(`${API_ROOT_URL}/users`, async (req, res, ctx) => {
