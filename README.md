@@ -34,6 +34,14 @@ Don't forget to create a folder `.vscode` and add this line for TypeScript React
 }
 ```
 
+## Updating Dependency
+
+To ensure security and also performance, regularly check: `npx npm-check-updates` to check dependency. Then update it either using :
+
+- `npx npm-check-updates --reject <package> -u`
+- `npx npm-check-updates --filter <package> -u`
+  Here's the guidance: [npm-check-updates](https://www.npmjs.com/package/npm-check-updates)
+
 # TDD Process
 
 I'm documenting the process I'm creating this for my future reference.
