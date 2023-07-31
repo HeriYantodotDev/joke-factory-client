@@ -1213,12 +1213,137 @@ I'm documenting the process I'm creating this for my future reference.
 
 ## Internationalization
 
-- $ Internationalization i18n
+For Internationalization, we're going to use this library [React i18next](https://react.i18next.com/).
+
+REMEMBER:
+PLEASE use this importing style
+
+```
+import * as i18n from 'i18next';
+```
+
+instead for
+
+```
+import i18n from 'i18next'
+```
+
+This is to ensure it will work in JEST test. For implementation, it's the same. Here's the conversation on [github](https://github.com/i18next/react-i18next-gitbook/issues/63)
+
+Also!
+When importuing JSON file please use the syntax like this:
+
+```
+import * as en from './en.json';
+import * as id from './id.json';
+```
+
+This to ensure both in the browser and also test are working.
+
+- Setting Up Internationalization i18n
+  First let's install both the library `i18next` and `react-i18next` above. After that we create a folder named `locale` and then create a file named `i18n.ts` and here's the code :
+
+  ```
+  import * as i18n from 'i18next';
+  import { initReactI18next } from 'react-i18next';
+  import * as en from './en.json';
+  import * as id from './id.json';
+
+  i18n
+    .use(initReactI18next) // passes i18n down to react-i18next
+    .init({
+      resources: {
+        en: {
+          translation: en,
+        },
+        id: {
+          translation: id,
+        },
+      },
+      lng: 'en',
+      fallbackLng: 'en',
+
+      interpolation: {
+        escapeValue: false,
+      },
+    });
+
+  export default i18n;
+
+  ```
+
+  Please pay attention on the syntax to import both the json file and also the i18n. For somehow I have to import it like that to ensure the test is not broken.
+
+  Then let's create the translation file and also enum. The detail is in the [`Locale` folder](./src/locale/)
+
+  Then in the `SignUp.component.tsx` we import this:
+
+  ```
+  import { withTranslation, useTranslation } from 'react-i18next';
+  import LOCALE from '../../locale/locale.enum';
+  ```
+
+  Then we replace all the label using `t` function :
+
+  ```
+  const { t } = useTranslation();
+
+  <h1 className="text-4xl font-bold text-blue-600 ">
+    {t(LOCALE.signUp)}
+  </h1>
+  ```
+
+  Then remove the export default from the functional component and replace the export default with this :
+
+  ```
+  const SignUpT = withTranslation()(SignUp);
+
+  export default SignUpT;
+  ```
+
+  Even though we changed the name for the default Export, in other component or test where we import it won't fail, but for the sake of consistency let's change all the name to `SignUpT` for consistency.
+
+  Next in the test, we just need to import the i18n like this :
+
+  ```
+  import '../locale/i18n';
+  ```
+
 - $ Language Selection
 - $ Component - Language selector
 - $ Validation Translation
 - $ Accept Language Header in Api Request
 - $ Refactor - Api Request Module
+
+## Routing
+
+- $ client - side routing
+
+- $ Layout - Navbar
+
+- $ Styling NavBar
+
+- $ React Router Version Warning
+
+- $ React Router
+
+- $ Component Life Cycle
+
+- $ Route For account activatin page
+
+- $ Api request - Account activation
+
+- $ Dependency list of useEffect
+
+- $ Progress Indicator - Account Activation
+
+- $ component - Alert & Spinner
+
+- $ Async wait in useEffect
+
+- $ Higher Order Component - HoC
+
+- $ Hooks
 
 # Journal
 

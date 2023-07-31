@@ -1,4 +1,5 @@
 import React, { ChangeEvent, useCallback, useState } from 'react';
+import { withTranslation, useTranslation } from 'react-i18next';
 import { FetchAPI } from '../../services/utils/fetchAPI';
 import {
   SignUpPostType,
@@ -8,6 +9,7 @@ import SignUpError from '../../services/Errors/SignUpErrorClass';
 import FormInput from '../../components/FormInput/FormInput.component';
 import Button from '../../components/Button/Button.component';
 import Spinner from '../../components/Spinner/Spinner.component';
+import LOCALE from '../../locale/locale.enum';
 
 function useInputState(
   errors: ErrorsStateSignUpType,
@@ -35,7 +37,8 @@ function checkIfButtonIsDisabled(password: string, passwordRepeat: string) {
   return !(password && passwordRepeat) || password !== passwordRepeat;
 }
 
-export default function SignUp() {
+function SignUp() {
+  const { t } = useTranslation();
   const [errors, setErrors] = useState<ErrorsStateSignUpType>({});
   const userNameInput = useInputState(errors, setErrors);
   const emailInput = useInputState(errors, setErrors);
@@ -91,12 +94,14 @@ export default function SignUp() {
         {!signUpSuccess && (
           <form className=" w-96 border text-center" data-testid="formSignUp">
             <div className="flex h-20 items-center justify-center border-b-2 bg-gray-100 ">
-              <h1 className="text-4xl font-bold text-blue-600 ">Sign Up</h1>
+              <h1 className="text-4xl font-bold text-blue-600 ">
+                {t(LOCALE.signUp)}
+              </h1>
             </div>
 
             <div className="mx-6 my-6">
               <FormInput
-                labelName="User Name"
+                labelName={t(LOCALE.username)}
                 htmlFor="userName"
                 onChange={userNameInput.onchange}
                 value={userNameInput.value}
@@ -104,7 +109,7 @@ export default function SignUp() {
                 error={errors.username}
               />
               <FormInput
-                labelName="Email"
+                labelName={t(LOCALE.email)}
                 htmlFor="email"
                 onChange={emailInput.onchange}
                 value={emailInput.value}
@@ -112,7 +117,7 @@ export default function SignUp() {
                 error={errors.email}
               />
               <FormInput
-                labelName="Password"
+                labelName={t(LOCALE.password)}
                 htmlFor="password"
                 onChange={passwordInput.onchange}
                 value={passwordInput.value}
@@ -121,7 +126,7 @@ export default function SignUp() {
                 error={errors.password}
               />
               <FormInput
-                labelName="Password Repeat"
+                labelName={t(LOCALE.passwordRepeat)}
                 htmlFor="passwordRepeat"
                 onChange={passwordRepeatInput.onchange}
                 value={passwordRepeatInput.value}
@@ -148,3 +153,7 @@ export default function SignUp() {
     </div>
   );
 }
+
+const SignUpT = withTranslation()(SignUp);
+
+export default SignUpT;
