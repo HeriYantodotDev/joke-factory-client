@@ -863,9 +863,48 @@ I'm documenting the process I'm creating this for my future reference.
 
     It's quite long huh? Anyway, why don't we just use Axio for ease? Well, I'll like to have some flexibility to control errors.
 
-- Enable Button After Validation
+- Enable Button After Validation.
 
-- $ Mock Service Worker - Override handler
+  Previously we already handled this, so just adding the test for the consistency: 
+  ```
+    test('hides spinner and enables button after response receveid', async () => {
+      server.use(
+        rest.post(`${API_ROOT_URL}/users`, async (req, res, ctx) => {
+          const response = await res(
+            ctx.status(400),
+            ctx.json({
+              validationErrors: {
+                username: 'username is not allowed to be empty',
+              },
+            })
+          );
+          return response;
+        })
+      );
+      const { user } = setup(<SignUp />);
+
+      await renderAndFillPasswordOnly(user);
+
+      if (!button) {
+        fail('Button is not found');
+      }
+      await user.click(button);
+
+      expect(screen.queryByRole('status')).not.toBeInTheDocument();
+      expect(button).toBeEnabled();
+
+    });
+  ```
+
+- Mock Service Worker - Override handler
+  In the previous two tests, we are modifying the server handler. In order to ensure consistency we have to set it back to the default setting, here's how: 
+  ```
+    beforeEach(() => {
+      counter = 0;
+      server.resetHandlers();
+    });
+  ```
+  As you can see in the `beforeEach` we're reseting back the handler to the default one. So we won't have any problem if we refer back to the default behaviour. 
 
 - $ Component - input
 
