@@ -229,20 +229,25 @@ describe('Sign Up Page', () => {
       });
     });
 
-    test('displays validation message for username', async () => {
-      server.use(
-        rest.post(`${API_ROOT_URL}/users`, async (req, res, ctx) => {
-          const response = await res(
-            ctx.status(400),
-            ctx.json({
-              validationErrors: {
-                username: 'username is not allowed to be empty',
-              },
-            })
-          );
-          return response;
-        })
-      );
+    function generateValidationError(
+      field = 'username',
+      message = 'username is not allowed to be empty'
+    ) {
+      return rest.post(`${API_ROOT_URL}/users`, async (req, res, ctx) => {
+        const response = await res(
+          ctx.status(400),
+          ctx.json({
+            validationErrors: {
+              [field]: message,
+            },
+          })
+        );
+        return response;
+      });
+    }
+
+    test('hides spinner and enables button after response receveid', async () => {
+      server.use(generateValidationError());
       const { user } = setup(<SignUp />);
 
       await renderAndFillPasswordOnly(user);
@@ -252,39 +257,69 @@ describe('Sign Up Page', () => {
       }
       await user.click(button);
 
-      const validationError = await screen.findByText(
-        'username is not allowed to be empty'
-      );
+      await waitFor(() => {
+        expect(screen.queryByRole('status')).not.toBeInTheDocument();
+        expect(button).toBeEnabled();
+      });
+    });
+
+    test.each`
+      field         | message
+      ${'username'} | ${'username is not allowed to be empty'}
+      ${'email'}    | ${'email is not allowed to be empty'}
+      ${'password'} | ${'password is not allowed to be empty'}
+    `('display $message for $field', async ({ field, message }) => {
+      server.use(generateValidationError(field, message));
+      const { user } = setup(<SignUp />);
+
+      await renderAndFillPasswordOnly(user);
+
+      if (!button) {
+        fail('Button is not found');
+      }
+      await user.click(button);
+
+      const validationError = await screen.findByText(message);
 
       expect(validationError).toBeInTheDocument();
     });
 
-    test('hides spinner and enables button after response receveid', async () => {
-      server.use(
-        rest.post(`${API_ROOT_URL}/users`, async (req, res, ctx) => {
-          const response = await res(
-            ctx.status(400),
-            ctx.json({
-              validationErrors: {
-                username: 'username is not allowed to be empty',
-              },
-            })
-          );
-          return response;
-        })
-      );
+    test('displays mismatch message for password repeat input', async () => {
       const { user } = setup(<SignUp />);
-
-      await renderAndFillPasswordOnly(user);
-
-      if (!button) {
-        fail('Button is not found');
-      }
-      await user.click(button);
-
-      expect(screen.queryByRole('status')).not.toBeInTheDocument();
-      expect(button).toBeEnabled();
-
+      const passwordInput = screen.getByLabelText('Password');
+      const passwordRepeatinput = screen.getByLabelText('Password Repeat');
+      await user.type(passwordInput, signUpNewUserData.password);
+      await user.type(
+        passwordRepeatinput,
+        `${signUpNewUserData.password}Random`
+      );
+      const validationErrors = screen.queryByText('Password mismatch');
+      expect(validationErrors).toBeInTheDocument();
     });
+
+    test.each`
+      field         | message                                  | label
+      ${'username'} | ${'username is not allowed to be empty'} | ${'User Name'}
+      ${'email'}    | ${'email is not allowed to be empty'}    | ${'Email'}
+      ${'password'} | ${'password is not allowed to be empty'} | ${'Password'}
+    `(
+      'clears validation error after $field is updated',
+      async ({ field, message, label }) => {
+        server.use(generateValidationError(field, message));
+        const { user } = setup(<SignUp />);
+        await renderAndFillPasswordOnly(user);
+
+        if (!button) {
+          fail('Button is not found');
+        }
+
+        await user.click(button);
+        const validationError = await screen.findByText(message);
+
+        await user.type(screen.getByLabelText(label), 'randomUpdated');
+
+        expect(validationError).not.toBeInTheDocument();
+      }
+    );
   });
 });

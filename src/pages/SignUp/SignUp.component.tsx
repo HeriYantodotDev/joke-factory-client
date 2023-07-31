@@ -8,16 +8,25 @@ import SignUpError from '../../services/Errors/SignUpErrorClass';
 import FormInput from '../../components/FormInput/FormInput.component';
 import Button from '../../components/Button/Button.component';
 import Spinner from '../../components/Spinner/Spinner.component';
-import ErrorFormText from '../../components/ErrorFormText/ErrorFormText.component';
 
-function useInputState(initialValue = '') {
-  const [value, setValue] = useState<string>(initialValue);
+function useInputState(
+  errors: ErrorsStateSignUpType,
+  setErrors: React.Dispatch<React.SetStateAction<ErrorsStateSignUpType>>,
+  initialValue = ''
+) {
+  const [values, setValues] = useState<string>(initialValue);
+
   function handlechange(event: ChangeEvent<HTMLInputElement>) {
-    setValue(event.target.value);
+    const { id, value } = event.target;
+    setValues(value);
+    setErrors({
+      ...errors,
+      [id.toLowerCase()]: '',
+    });
   }
 
   return {
-    value,
+    value: values,
     onchange: handlechange,
   };
 }
@@ -27,18 +36,23 @@ function checkIfButtonIsDisabled(password: string, passwordRepeat: string) {
 }
 
 export default function SignUp() {
-  const userNameInput = useInputState();
-  const emailInput = useInputState();
-  const passwordInput = useInputState();
-  const passwordRepeatInput = useInputState();
+  const [errors, setErrors] = useState<ErrorsStateSignUpType>({});
+  const userNameInput = useInputState(errors, setErrors);
+  const emailInput = useInputState(errors, setErrors);
+  const passwordInput = useInputState(errors, setErrors);
+  const passwordRepeatInput = useInputState(errors, setErrors);
   const [apiProgress, setApiProgress] = useState<boolean>(false);
   const [signUpSuccess, setSignUpSuccess] = useState<boolean>(false);
-  const [errors, setErrors] = useState<ErrorsStateSignUpType>({});
 
   const isDisabled = checkIfButtonIsDisabled(
     passwordInput.value,
     passwordRepeatInput.value
   );
+
+  const passwordMismatch =
+    passwordInput.value !== passwordRepeatInput.value
+      ? 'Password mismatch'
+      : '';
 
   const handleSubmit = useCallback(
     async (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -75,7 +89,7 @@ export default function SignUp() {
     <div className="flex items-center justify-center">
       <div>
         {!signUpSuccess && (
-          <form className="w-auto border text-center" data-testid="formSignUp">
+          <form className=" w-96 border text-center" data-testid="formSignUp">
             <div className="flex h-20 items-center justify-center border-b-2 bg-gray-100 ">
               <h1 className="text-4xl font-bold text-blue-600 ">Sign Up</h1>
             </div>
@@ -87,14 +101,15 @@ export default function SignUp() {
                 onChange={userNameInput.onchange}
                 value={userNameInput.value}
                 id="userName"
+                error={errors.username}
               />
-              <ErrorFormText>{errors.username}</ErrorFormText>
               <FormInput
                 labelName="Email"
                 htmlFor="email"
                 onChange={emailInput.onchange}
                 value={emailInput.value}
                 id="email"
+                error={errors.email}
               />
               <FormInput
                 labelName="Password"
@@ -103,6 +118,7 @@ export default function SignUp() {
                 value={passwordInput.value}
                 id="password"
                 type="password"
+                error={errors.password}
               />
               <FormInput
                 labelName="Password Repeat"
@@ -111,6 +127,7 @@ export default function SignUp() {
                 value={passwordRepeatInput.value}
                 id="passwordRepeat"
                 type="password"
+                error={passwordMismatch}
               />
               <Button
                 onClick={handleSubmit}
