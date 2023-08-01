@@ -17,18 +17,68 @@ import LanguageSelector from '../components/LanguageSelector/LanguageSelector.co
 import * as en from '../locale/en.json';
 import * as id from '../locale/id.json';
 
+const signUpNewUserData = {
+  username: 'test1',
+  email: 'test1@gmail.com',
+  password: 'T3rl4lu@123',
+};
+
+let button: HTMLElement | null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let requestBody: any;
+let counter = 0;
+let acceptLanguageHeader: string | null;
+
+const server = setupServer(
+  rest.post(`${API_ROOT_URL}/users`, async (req, res, ctx) => {
+    counter += 1;
+    requestBody = await req.json();
+    acceptLanguageHeader = req.headers.get('Accept-Language');
+    const response = await res(ctx.status(200), ctx.json({}));
+    return response;
+  })
+);
+
+async function renderAndFillPasswordOnly(userEventProp: UserEvent) {
+  const passwordInput = screen.getByLabelText('Password');
+  const passwordRepeatInput = screen.getByLabelText('Password Repeat');
+  await userEventProp.type(passwordInput, signUpNewUserData.password);
+  await userEventProp.type(passwordRepeatInput, signUpNewUserData.password);
+  button = screen.queryByRole('button', { name: en.signUp });
+}
+
+async function renderAndFill(userEventProp: UserEvent) {
+  const userNameInput = screen.getByLabelText('User Name');
+  const emailInput = screen.getByLabelText('Email');
+  const passwordInput = screen.getByLabelText('Password');
+  const passwordRepeatInput = screen.getByLabelText('Password Repeat');
+
+  await userEventProp.type(userNameInput, signUpNewUserData.username);
+  await userEventProp.type(emailInput, signUpNewUserData.email);
+  await userEventProp.type(passwordInput, signUpNewUserData.password);
+  await userEventProp.type(passwordRepeatInput, signUpNewUserData.password);
+  button = screen.queryByRole('button', { name: 'Sign Up' });
+}
+
+beforeAll(() => {
+  server.listen();
+});
+
+beforeEach(() => {
+  counter = 0;
+  server.resetHandlers();
+});
+
+afterAll(() => {
+  server.close();
+});
+
 function setup(jsx: JSX.Element) {
   return {
     user: userEvent.setup(),
     ...render(jsx),
   };
 }
-
-const signUpNewUserData = {
-  username: 'test1',
-  email: 'test1@gmail.com',
-  password: 'T3rl4lu@123',
-};
 
 describe('Sign Up Page', () => {
   describe('Layout', () => {
@@ -84,66 +134,18 @@ describe('Sign Up Page', () => {
 
     test('has a sign up button', () => {
       render(<SignUp />);
-      const button = screen.queryByRole('button', { name: 'Sign Up' });
-      expect(button).toBeInTheDocument();
+      const buttonOnly = screen.queryByRole('button', { name: 'Sign Up' });
+      expect(buttonOnly).toBeInTheDocument();
     });
 
     test('disables the button initially', () => {
       render(<SignUp />);
-      const button = screen.queryByRole('button', { name: 'Sign Up' });
-      expect(button).toBeDisabled();
+      const buttonOnly = screen.queryByRole('button', { name: 'Sign Up' });
+      expect(buttonOnly).toBeDisabled();
     });
   });
 
   describe('Interaction', () => {
-    let button: HTMLElement | null;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let requestBody: any;
-    let counter = 0;
-
-    const server = setupServer(
-      rest.post(`${API_ROOT_URL}/users`, async (req, res, ctx) => {
-        counter += 1;
-        requestBody = await req.json();
-        const response = await res(ctx.status(200), ctx.json({}));
-        return response;
-      })
-    );
-
-    beforeAll(() => {
-      server.listen();
-    });
-
-    beforeEach(() => {
-      counter = 0;
-      server.resetHandlers();
-    });
-
-    afterAll(() => {
-      server.close();
-    });
-
-    async function renderAndFillPasswordOnly(userEventProp: UserEvent) {
-      const passwordInput = screen.getByLabelText('Password');
-      const passwordRepeatInput = screen.getByLabelText('Password Repeat');
-      await userEventProp.type(passwordInput, signUpNewUserData.password);
-      await userEventProp.type(passwordRepeatInput, signUpNewUserData.password);
-      button = screen.queryByRole('button', { name: 'Sign Up' });
-    }
-
-    async function renderAndFill(userEventProp: UserEvent) {
-      const userNameInput = screen.getByLabelText('User Name');
-      const emailInput = screen.getByLabelText('Email');
-      const passwordInput = screen.getByLabelText('Password');
-      const passwordRepeatInput = screen.getByLabelText('Password Repeat');
-
-      await userEventProp.type(userNameInput, signUpNewUserData.username);
-      await userEventProp.type(emailInput, signUpNewUserData.email);
-      await userEventProp.type(passwordInput, signUpNewUserData.password);
-      await userEventProp.type(passwordRepeatInput, signUpNewUserData.password);
-      button = screen.queryByRole('button', { name: 'Sign Up' });
-    }
-
     test('enables the button when password and password repeat has the same value ', async () => {
       const { user } = setup(<SignUp />);
       await renderAndFill(user);
@@ -297,7 +299,7 @@ describe('Sign Up Page', () => {
         passwordRepeatInput,
         `${signUpNewUserData.password}Random`
       );
-      const validationErrors = screen.queryByText('Password mismatch');
+      const validationErrors = screen.queryByText(en.passwordMismatch);
       expect(validationErrors).toBeInTheDocument();
     });
 
@@ -341,6 +343,23 @@ describe('Sign Up Page', () => {
       });
     });
 
+    test('initially displays all text in English', () => {
+      render(<SignUp />);
+      expect(
+        screen.getByRole('heading', { name: en.signUp })
+      ).toBeInTheDocument();
+
+      expect(
+        screen.getByRole('button', { name: en.signUp })
+      ).toBeInTheDocument();
+
+      expect(screen.getByLabelText(en.username)).toBeInTheDocument();
+
+      expect(screen.getByLabelText(en.email)).toBeInTheDocument();
+      expect(screen.getByLabelText(en.password)).toBeInTheDocument();
+      expect(screen.getByLabelText(en.passwordRepeat)).toBeInTheDocument();
+    });
+
     test('displays all text in Indonesia after changing the language to Indonesian', async () => {
       const { user } = setup(renderSetup);
 
@@ -361,23 +380,6 @@ describe('Sign Up Page', () => {
       expect(screen.getByLabelText(id.email)).toBeInTheDocument();
       expect(screen.getByLabelText(id.password)).toBeInTheDocument();
       expect(screen.getByLabelText(id.passwordRepeat)).toBeInTheDocument();
-    });
-
-    test('initially displays all text in English', () => {
-      render(<SignUp />);
-      expect(
-        screen.getByRole('heading', { name: en.signUp })
-      ).toBeInTheDocument();
-
-      expect(
-        screen.getByRole('button', { name: en.signUp })
-      ).toBeInTheDocument();
-
-      expect(screen.getByLabelText(en.username)).toBeInTheDocument();
-
-      expect(screen.getByLabelText(en.email)).toBeInTheDocument();
-      expect(screen.getByLabelText(en.password)).toBeInTheDocument();
-      expect(screen.getByLabelText(en.passwordRepeat)).toBeInTheDocument();
     });
 
     test('displays all text in English after changing the language', async () => {
@@ -404,6 +406,56 @@ describe('Sign Up Page', () => {
       expect(screen.getByLabelText(en.email)).toBeInTheDocument();
       expect(screen.getByLabelText(en.password)).toBeInTheDocument();
       expect(screen.getByLabelText(en.passwordRepeat)).toBeInTheDocument();
+    });
+
+    test('displays password mismatch validation in Indonesian', async () => {
+      const { user } = setup(renderSetup);
+
+      const idToggle = screen.getByTitle('Indonesian');
+
+      await user.click(idToggle);
+
+      const passwordInput = screen.getByLabelText(id.password);
+
+      await user.type(passwordInput, 'random');
+
+      const validationMessageInID = screen.queryByText(id.passwordMismatch);
+      expect(validationMessageInID).toBeInTheDocument();
+    });
+
+    test('sends accept language header as EN for outgoing request', async () => {
+      const { user } = setup(renderSetup);
+      await renderAndFillPasswordOnly(user);
+
+      if (!button) {
+        fail('Button is not found');
+      }
+
+      await user.click(button);
+
+      await waitFor(() => {
+        expect(acceptLanguageHeader).toBe('en');
+      });
+    });
+
+    test('sends accept language header as ID for outgoing request after selecting language', async () => {
+      const { user } = setup(renderSetup);
+
+      await renderAndFillPasswordOnly(user);
+
+      const idToggle = screen.getByTitle('Indonesian');
+
+      await user.click(idToggle);
+
+      if (!button) {
+        fail('Button is not found');
+      }
+
+      await user.click(button);
+
+      await waitFor(() => {
+        expect(acceptLanguageHeader).toBe('id');
+      });
     });
   });
 });

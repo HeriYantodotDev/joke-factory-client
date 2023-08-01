@@ -1,3 +1,5 @@
+import i18n from '../../locale/i18n';
+
 const env = process.env.NODE_ENV;
 
 interface EnvRootMap {
@@ -24,6 +26,9 @@ export class FetchAPI {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        'Accept-Language': i18n.default?.language || (i18n as any).language,
+        //  The reason for using (i18n as any).language as a fallback is related to Jest testing.
       },
       body: JSON.stringify(body),
     });

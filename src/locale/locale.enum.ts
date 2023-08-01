@@ -4,6 +4,7 @@ enum LOCALE {
   email = 'email',
   password = 'password',
   passwordRepeat = 'passwordRepeat',
+  passwordMismatch = 'passwordMismatch',
 }
 
 export default LOCALE;

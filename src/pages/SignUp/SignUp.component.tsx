@@ -54,7 +54,7 @@ export default function SignUp() {
 
   const passwordMismatch =
     passwordInput.value !== passwordRepeatInput.value
-      ? 'Password mismatch'
+      ? LOCALE.passwordMismatch
       : '';
 
   const handleSubmit = useCallback(
@@ -132,7 +132,7 @@ export default function SignUp() {
                 value={passwordRepeatInput.value}
                 id="passwordRepeat"
                 type="password"
-                error={passwordMismatch}
+                error={t(passwordMismatch)}
               />
               <Button
                 onClick={handleSubmit}
