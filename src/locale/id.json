@@ -3,5 +3,6 @@
   "username": "Nama Pengguna",
   "email": "Email",
   "password": "Kata Sandi",
-  "passwordRepeat": "Ulangi Kata Sandi"
+  "passwordRepeat": "Ulangi Kata Sandi",
+  "passwordMismatch": "Kata Sandi Tidak Cocok"
 }
