@@ -89,7 +89,7 @@ export default function SignUp() {
   );
 
   return (
-    <div className="flex items-center justify-center">
+    <div className="flex items-center justify-center" data-testid="signUpPage">
       <div>
         {!signUpSuccess && (
           <form className="w-80 border text-center" data-testid="formSignUp">

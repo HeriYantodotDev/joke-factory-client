@@ -13,8 +13,7 @@
     "test": "jest --verbose",
     "test:coverage": "jest --verbose --coverage",
     "test:watch": "jest --verbose --watchAll",
-    "test:one": "jest --testPathPattern=SignUp.Component.test.ts",
-    "test:one:watch": "jest --testPathPattern=SignUp.Component.test.ts --watchAll"
+    "test:one:watch": "jest --testPathPattern=App.Component.test.ts --watchAll"
   },
   "dependencies": {
     "i18next": "^23.4.1",
