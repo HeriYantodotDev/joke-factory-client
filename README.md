@@ -19,10 +19,9 @@ First of all, for testing here are the libraries that we should install:
   "ts-jest": "^29.1.1",
 ```
 
-Piuh ... That's a lot! Isn't it!
 Here's a great blog to set it up: [jest-vite](https://hung.dev/posts/jest-vite)
 
-For Linting & also formating, I'm using the guidelines from this blog: [setting EsLint](https://github.com/CodingGarden/react-ts-starter), and here's the YouTube Video : [Youtube](https://www.youtube.com/watch?v=cchqeWY0Nak)
+For Linting & also formatting, I'm using the guidelines from this blog: [setting EsLint](https://github.com/CodingGarden/react-ts-starter), and here's the YouTube Video : [Youtube](https://www.youtube.com/watch?v=cchqeWY0Nak)
 
 Don't forget to create a folder `.vscode` and add this line for TypeScript React. If not, prettier won't detect it.
 
@@ -196,10 +195,10 @@ I'm documenting the process I'm creating this for my future reference.
         test('enables the button when password and password repeat has the same value ', async () => {
           const { user } = setup(< SignUp />);
           const passwordInput = screen.getByLabelText('Password');
-          const passwordRepeatinput = screen.getByLabelText('Password Repeat');
+          const passwordRepeatInput = screen.getByLabelText('Password Repeat');
 
           await user.type(passwordInput, 'T3rl4lu@123');
-          await user.type(passwordRepeatinput, 'T3rl4lu@123');
+          await user.type(passwordRepeatInput, 'T3rl4lu@123');
           const button = screen.queryByRole('button', { name: 'Sign Up' });
           expect(button).toBeEnabled();
 
@@ -210,20 +209,20 @@ I'm documenting the process I'm creating this for my future reference.
 
     - implementation
       As you can see above, we're using React State to update the value of the password. We're using
-      custom hooks for the sake of readibility and maintainability. Then to check for whether the button should be disabled or not, we simply check everytime the component is rerendered. Everytime we change the state, React will rerender the component.
+      custom hooks for the sake of readability and maintainability. Then to check for whether the button should be disabled or not, we simply check every time the component is rerendered. Every time we change the state, React will rerender the component.
 
       ```
       import { ChangeEvent, useState } from 'react';
 
       function usePasswordInputState(initialValue: string = '') {
         const [value, setValue] = useState<string>(initialValue);
-        function handlechange(event: ChangeEvent<HTMLInputElement>) {
+        function handleChange(event: ChangeEvent<HTMLInputElement>) {
           setValue(event.target.value);
         }
 
         return {
           value,
-          onchange: handlechange,
+          onchange: handleChange,
         };
       }
 
@@ -280,12 +279,12 @@ I'm documenting the process I'm creating this for my future reference.
       const userNameInput = screen.getByLabelText('User Name');
       const emailInput = screen.getByLabelText('Email');
       const passwordInput = screen.getByLabelText('Password');
-      const passwordRepeatinput = screen.getByLabelText('Password Repeat');
+      const passwordRepeatInput = screen.getByLabelText('Password Repeat');
 
       await user.type(userNameInput, signUpNewUserData.username);
       await user.type(emailInput, signUpNewUserData.email);
       await user.type(passwordInput, signUpNewUserData.password);
-      await user.type(passwordRepeatinput, signUpNewUserData.password);
+      await user.type(passwordRepeatInput, signUpNewUserData.password);
       const button = screen.queryByRole('button', { name: 'Sign Up' });
       if (!button) {
         fail('Button is not found');
@@ -336,13 +335,13 @@ I'm documenting the process I'm creating this for my future reference.
 
     function useInputState(initialValue: string = '') {
       const [value, setValue] = useState<string>(initialValue);
-      function handlechange(event: ChangeEvent<HTMLInputElement>) {
+      function handleChange(event: ChangeEvent<HTMLInputElement>) {
         setValue(event.target.value);
       }
 
       return {
         value,
-        onchange: handlechange,
+        onchange: handleChange,
       };
     }
 
@@ -401,7 +400,7 @@ I'm documenting the process I'm creating this for my future reference.
   Instead for mocking we can use this library: [`mswjs.io`](https://mswjs.io/)
 
   - So let's use it. First let's install it: `npm i msw --save-dev`
-  - In CRA, it already provides polyfill for fetch at node environtment, however Vite doesn't. So we have to install a library to polyfill it. `npm i whatwg-fetch --save-dev`. Here's the detail how to set it up [jestSetUp](https://github.com/mswjs/examples/blob/master/examples/with-jest/jest.setup.js)
+  - In CRA, it already provides polyfill for fetch at node environment, however Vite doesn't. So we have to install a library to polyfill it. `npm i whatwg-fetch --save-dev`. Here's the detail how to set it up [jestSetUp](https://github.com/mswjs/examples/blob/master/examples/with-jest/jest.setup.js)
   - now we have to import it like this :
 
     ```
@@ -426,10 +425,10 @@ I'm documenting the process I'm creating this for my future reference.
     import { API_ROOT_URL } from '../services/utils/fetchAPI';
     import { setupServer } from 'msw/node';
     test('sends username, email, and password to backend after clicking the button', async () => {
-          let requestbody;
+          let requestBody;
           const server = setupServer(
             rest.post(API_ROOT_URL + '/users', async (req, res, ctx) => {
-              requestbody = await req.json();
+              requestBody = await req.json();
               return res(ctx.status(200));
             }),
           );
@@ -438,12 +437,12 @@ I'm documenting the process I'm creating this for my future reference.
           const userNameInput = screen.getByLabelText('User Name');
           const emailInput = screen.getByLabelText('Email');
           const passwordInput = screen.getByLabelText('Password');
-          const passwordRepeatinput = screen.getByLabelText('Password Repeat');
+          const passwordRepeatInput = screen.getByLabelText('Password Repeat');
 
           await user.type(userNameInput, signUpNewUserData.username);
           await user.type(emailInput, signUpNewUserData.email);
           await user.type(passwordInput, signUpNewUserData.password);
-          await user.type(passwordRepeatinput, signUpNewUserData.password);
+          await user.type(passwordRepeatInput, signUpNewUserData.password);
           const button = screen.queryByRole('button', { name: 'Sign Up' });
           if (!button) {
             fail('Button is not found');
@@ -451,7 +450,7 @@ I'm documenting the process I'm creating this for my future reference.
 
           await user.click(button);
 
-          expect(requestbody).toEqual(signUpNewUserData);
+          expect(requestBody).toEqual(signUpNewUserData);
 
           server.close();
         });
@@ -527,7 +526,7 @@ I'm documenting the process I'm creating this for my future reference.
 
   That's it. Now we can use it. Here's the documentation [tailwindCSS](https://tailwindcss.com/)
 
-- When a user clicks `Sign Up` botton, the browser sends a request to the backend. The problem is the user can click it many times. We don't want it. And also we want to show progress bar
+- When a user clicks `Sign Up` button, the browser sends a request to the backend. The problem is the user can click it many times. We don't want it. And also we want to show progress bar
 
   - First let's create a test to disable the button when there is an ongoing request.
 
@@ -547,12 +546,12 @@ I'm documenting the process I'm creating this for my future reference.
       const userNameInput = screen.getByLabelText('User Name');
       const emailInput = screen.getByLabelText('Email');
       const passwordInput = screen.getByLabelText('Password');
-      const passwordRepeatinput = screen.getByLabelText('Password Repeat');
+      const passwordRepeatInput = screen.getByLabelText('Password Repeat');
 
       await user.type(userNameInput, signUpNewUserData.username);
       await user.type(emailInput, signUpNewUserData.email);
       await user.type(passwordInput, signUpNewUserData.password);
-      await user.type(passwordRepeatinput, signUpNewUserData.password);
+      await user.type(passwordRepeatInput, signUpNewUserData.password);
       const button = screen.queryByRole('button', { name: 'Sign Up' });
 
       if (!button) {
@@ -568,7 +567,7 @@ I'm documenting the process I'm creating this for my future reference.
     });
     ```
 
-  - The implementation is very simple. In the button component if compare whether the password or passwordRepeat is the same. If it's the same then we set it false. Let's use an OR operator to manipulate the behaviour.
+  - The implementation is very simple. In the button component if compare whether the password or passwordRepeat is the same. If it's the same then we set it false. Let's use an OR operator to manipulate the behavior.
     Let's create a new state `const [apiProgress, setApiProgress] = useState<boolean>(false);`
     After that in the `handleSubmit` function we set the apiProgress to true:
 
@@ -636,7 +635,7 @@ I'm documenting the process I'm creating this for my future reference.
     }
     ```
 
-    Ok and for the implemention, we just check whether the state `apiProgress` is true to display the spinner. Anyway please take a look at the test for this, you can see that to check whether this spinner isn't rendered we use `queryByRole`.
+    Ok and for the implementation, we just check whether the state `apiProgress` is true to display the spinner. Anyway please take a look at the test for this, you can see that to check whether this spinner isn't rendered we use `queryByRole`.
 
     ```
     <Button onClick={handleSubmit} disabled={isDisabled || apiProgress}>
@@ -658,7 +657,7 @@ I'm documenting the process I'm creating this for my future reference.
       });
   ```
 
-  In the test above we remove await `user.click(button)` amd then wrap the spinner checkin in the `waitFor`. The purpose of this is to ensure the consistency of the test. So after a user clicks a button the next step is the spinner will be rendered and after getting the successful response, the sign up form will be hidden.
+  In the test above we remove await `user.click(button)` amd then wrap the spinner in the `waitFor`. The purpose of this is to ensure the consistency of the test. So after a user clicks a button the next step is the spinner will be rendered and after getting the successful response, the sign up form will be hidden.
 
   The problem is if we using `await` then we don't know when the response will come back. if it's faster, then the test to check the spinner will be failed. The result of the test will be inconsistent.
 
@@ -732,7 +731,7 @@ I'm documenting the process I'm creating this for my future reference.
     ```
 
 - Refactoring The test
-  Instead of hardcoding server everytime we run the test, we can use beforeAll and beforeEach for the test
+  Instead of hardcoding server every time we run the test, we can use beforeAll and beforeEach for the test
 
 ## Validation
 
@@ -881,14 +880,14 @@ I'm documenting the process I'm creating this for my future reference.
     }
     ```
 
-    It's quite long huh? Anyway, why don't we just use Axio for ease? Well, I'll like to have some flexibility to control errors.
+    It's quite long huh? Anyway, why don't we just use Axios for ease? Well, I'll like to have some flexibility to control errors.
 
 - Enable Button After Validation.
 
   Previously we already handled this, so just adding the test for the consistency:
 
   ```
-    test('hides spinner and enables button after response receveid', async () => {
+    test('hides spinner and enables button after response received', async () => {
       server.use(
         rest.post(`${API_ROOT_URL}/users`, async (req, res, ctx) => {
           const response = await res(
@@ -917,6 +916,8 @@ I'm documenting the process I'm creating this for my future reference.
     });
   ```
 
+  /o90p
+
 - Mock Service Worker - Override handler
   In the previous two tests, we are modifying the server handler. In order to ensure consistency we have to set it back to the default setting, here's how:
 
@@ -927,7 +928,7 @@ I'm documenting the process I'm creating this for my future reference.
     });
   ```
 
-  As you can see in the `beforeEach` we're reseting back the handler to the default one. So we won't have any problem if we refer back to the default behaviour.
+  As you can see in the `beforeEach` we're resetting back the handler to the default one. So we won't have any problem if we refer back to the default behavior.
 
 - $ Component - FormInput
   Now let's add several tests for FormInput component to render error messages. But before that let's create a function in the test to handle the server override:
@@ -954,7 +955,7 @@ I'm documenting the process I'm creating this for my future reference.
   Now let's refactor the previous test and also add several tests:
 
   ```
-    test('hides spinner and enables button after response receveid', async () => {
+    test('hides spinner and enables button after response received', async () => {
       server.use(generateValidationError());
       const { user } = setup(<SignUp />);
 
@@ -995,10 +996,10 @@ I'm documenting the process I'm creating this for my future reference.
     test('displays mismatch message for password repeat input', async () => {
       const { user } = setup(<SignUp />);
       const passwordInput = screen.getByLabelText('Password');
-      const passwordRepeatinput = screen.getByLabelText('Password Repeat');
+      const passwordRepeatInput = screen.getByLabelText('Password Repeat');
       await user.type(passwordInput, signUpNewUserData.password);
       await user.type(
-        passwordRepeatinput,
+        passwordRepeatInput,
         `${signUpNewUserData.password}Random`
       );
       const validationErrors = screen.queryByText('Password mismatch');
@@ -1043,7 +1044,7 @@ I'm documenting the process I'm creating this for my future reference.
   ) {
     const [values, setValues] = useState<string>(initialValue);
 
-    function handlechange(event: ChangeEvent<HTMLInputElement>) {
+    function handleChange(event: ChangeEvent<HTMLInputElement>) {
       const { id, value } = event.target;
       setValues(value);
       setErrors({
@@ -1054,7 +1055,7 @@ I'm documenting the process I'm creating this for my future reference.
 
     return {
       value: values,
-      onchange: handlechange,
+      onchange: handleChange,
     };
   }
 
@@ -1239,7 +1240,7 @@ import i18n from 'i18next'
 This is to ensure it will work in JEST test. For implementation, it's the same. Here's the conversation on [github](https://github.com/i18next/react-i18next-gitbook/issues/63)
 
 Also!
-When importuing JSON file please use the syntax like this:
+When importing JSON file please use the syntax like this:
 
 ```
 import * as en from './en.json';
@@ -1317,8 +1318,154 @@ This to ensure both in the browser and also test are working.
   import '../locale/i18n';
   ```
 
-- $ Language Selection
-- $ Component - Language selector
+- Language Selection
+  First off all let's create a test to test for the language selection:
+
+  ```
+  describe('Internationalization', () => {
+    const renderSetup = (
+      <div>
+        <SignUp />
+        <LanguageSelector />
+      </div>
+    );
+
+    afterEach(() => {
+      act(() => {
+        i18n.changeLanguage('en');
+      });
+    });
+
+    test('displays all text in Indonesia after changing the language to Indonesian', async () => {
+      const { user } = setup(renderSetup);
+
+      const idToggle = screen.getByTitle('Indonesian');
+
+      await user.click(idToggle);
+
+      expect(
+        screen.getByRole('heading', { name: id.signUp })
+      ).toBeInTheDocument();
+
+      expect(
+        screen.getByRole('button', { name: id.signUp })
+      ).toBeInTheDocument();
+
+      expect(screen.getByLabelText(id.username)).toBeInTheDocument();
+
+      expect(screen.getByLabelText(id.email)).toBeInTheDocument();
+      expect(screen.getByLabelText(id.password)).toBeInTheDocument();
+      expect(screen.getByLabelText(id.passwordRepeat)).toBeInTheDocument();
+    });
+
+    test('initially displays all text in English', () => {
+      render(<SignUp />);
+      expect(
+        screen.getByRole('heading', { name: en.signUp })
+      ).toBeInTheDocument();
+
+      expect(
+        screen.getByRole('button', { name: en.signUp })
+      ).toBeInTheDocument();
+
+      expect(screen.getByLabelText(en.username)).toBeInTheDocument();
+
+      expect(screen.getByLabelText(en.email)).toBeInTheDocument();
+      expect(screen.getByLabelText(en.password)).toBeInTheDocument();
+      expect(screen.getByLabelText(en.passwordRepeat)).toBeInTheDocument();
+    });
+
+    test('displays all text in English after changing the language', async () => {
+      const { user } = setup(renderSetup);
+
+      const idToggle = screen.getByTitle('Indonesian');
+
+      await user.click(idToggle);
+
+      const enToggle = screen.getByTitle('English');
+
+      await user.click(enToggle);
+
+      expect(
+        screen.getByRole('heading', { name: en.signUp })
+      ).toBeInTheDocument();
+
+      expect(
+        screen.getByRole('button', { name: en.signUp })
+      ).toBeInTheDocument();
+
+      expect(screen.getByLabelText(en.username)).toBeInTheDocument();
+
+      expect(screen.getByLabelText(en.email)).toBeInTheDocument();
+      expect(screen.getByLabelText(en.password)).toBeInTheDocument();
+      expect(screen.getByLabelText(en.passwordRepeat)).toBeInTheDocument();
+    });
+  });
+  ```
+
+  As you can see above that we're testing whether we have a LanguageSelector component, and test the interaction between it.
+
+  For the implementation let's create a component for it :
+
+  ```
+  import { useTranslation } from 'react-i18next';
+
+  export default function LanguageSelector() {
+    const { i18n } = useTranslation();
+
+    function onClickIndonesian() {
+      i18n.changeLanguage('id');
+    }
+
+    function onClickEnglish() {
+      i18n.changeLanguage('en');
+    }
+
+    return (
+      <div>
+        <button type="button" onClick={onClickEnglish}>
+          <img
+            className="h-5 w-9"
+            title="English"
+            alt="US Flag"
+            src="https://raw.githubusercontent.com/HeriYantodotDev/image-repos/main/us.png"
+          />
+        </button>
+        <button type="button" onClick={onClickIndonesian}>
+          <img
+            className="h-5 w-9"
+            title="Indonesian"
+            alt="Indonesian Flag"
+            src="https://raw.githubusercontent.com/HeriYantodotDev/image-repos/main/id.png"
+          />
+        </button>
+      </div>
+    );
+  }
+
+  ```
+
+  Great now let's import it in the `App.tsx`
+
+  ```
+  import SignUp from './pages/SignUp/SignUp.component';
+  import LanguageSelector from './components/LanguageSelector/LanguageSelector.component';
+
+  function App() {
+    return (
+      <div className="mx-7 mb-10 mt-10">
+        <SignUp />
+        <LanguageSelector />
+      </div>
+    );
+  }
+
+  export default App;
+
+  ```
+
+  Anyway since we're using hooks `useTranslation` we don't have to wrap the SignUp component in a higher order component. It's the same with `LanguageSelector` component.
+
 - $ Validation Translation
 - $ Accept Language Header in Api Request
 - $ Refactor - Api Request Module
@@ -1337,7 +1484,7 @@ This to ensure both in the browser and also test are working.
 
 - $ Component Life Cycle
 
-- $ Route For account activatin page
+- $ Route For account activating page
 
 - $ Api request - Account activation
 

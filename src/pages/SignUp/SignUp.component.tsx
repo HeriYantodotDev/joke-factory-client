@@ -1,5 +1,5 @@
 import React, { ChangeEvent, useCallback, useState } from 'react';
-import { withTranslation, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { FetchAPI } from '../../services/utils/fetchAPI';
 import {
   SignUpPostType,
@@ -18,7 +18,7 @@ function useInputState(
 ) {
   const [values, setValues] = useState<string>(initialValue);
 
-  function handlechange(event: ChangeEvent<HTMLInputElement>) {
+  function handleChange(event: ChangeEvent<HTMLInputElement>) {
     const { id, value } = event.target;
     setValues(value);
     setErrors({
@@ -29,7 +29,7 @@ function useInputState(
 
   return {
     value: values,
-    onchange: handlechange,
+    onchange: handleChange,
   };
 }
 
@@ -37,7 +37,7 @@ function checkIfButtonIsDisabled(password: string, passwordRepeat: string) {
   return !(password && passwordRepeat) || password !== passwordRepeat;
 }
 
-function SignUp() {
+export default function SignUp() {
   const { t } = useTranslation();
   const [errors, setErrors] = useState<ErrorsStateSignUpType>({});
   const userNameInput = useInputState(errors, setErrors);
@@ -92,7 +92,7 @@ function SignUp() {
     <div className="flex items-center justify-center">
       <div>
         {!signUpSuccess && (
-          <form className=" w-96 border text-center" data-testid="formSignUp">
+          <form className="w-80 border text-center" data-testid="formSignUp">
             <div className="flex h-20 items-center justify-center border-b-2 bg-gray-100 ">
               <h1 className="text-4xl font-bold text-blue-600 ">
                 {t(LOCALE.signUp)}
@@ -139,7 +139,7 @@ function SignUp() {
                 disabled={isDisabled || apiProgress}
               >
                 {apiProgress && <Spinner />}
-                Sign Up
+                {t(LOCALE.signUp)}
               </Button>
             </div>
           </form>
@@ -153,7 +153,3 @@ function SignUp() {
     </div>
   );
 }
-
-const SignUpT = withTranslation()(SignUp);
-
-export default SignUpT;
