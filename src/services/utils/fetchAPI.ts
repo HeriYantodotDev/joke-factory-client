@@ -7,7 +7,7 @@ interface EnvRootMap {
 }
 
 const envRootMap: EnvRootMap = {
-  development: 'http://localhost:3000',
+  development: 'https://joke-factory-server.fly.dev',
   test: 'http://localhost:5173',
   production: 'define-it-later',
 };
